@@ -1,0 +1,230 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="renderer" content="webkit|ie-comp|ie-stand">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport"
+    content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+
+  <link rel="stylesheet" type="text/css" href="static/h-ui/css/H-ui.min.css" />
+  <link rel="stylesheet" type="text/css" href="static/h-ui.admin/css/H-ui.admin.css" />
+  <link rel="stylesheet" type="text/css" href="lib/Hui-iconfont/1.0.8/iconfont.css" />
+  <link rel="stylesheet" type="text/css" href="static/h-ui.admin/skin/default/skin.css" id="skin" />
+  <link rel="stylesheet" type="text/css" href="static/h-ui.admin/css/style.css" />
+
+  <title>图片列表</title>
+</head>
+
+<body>
+  <nav class="breadcrumb"><i class="Hui-iconfont">&#xe67f;</i> 首页 <span class="c-gray en">&gt;</span> 关注管理 <span
+      class="c-gray en">&gt;</span> 关注列表 <a class="btn btn-success radius r" style="line-height:1.6em;margin-top:3px"
+      href="javascript:location.replace(location.href);" title="刷新"><i class="Hui-iconfont">&#xe68f;</i></a></nav>
+  <div class="page-container">
+
+    <div class="cl pd-5 bg-1 bk-gray mt-20">
+      <!-- <span class="l">
+
+        <a class="btn btn-primary radius" onclick="user_add('添加作品','user-add.html')" href="javascript:;">
+          <i class="Hui-iconfont">&#xe600;</i>
+          添加用户</a></span> -->
+      <span class="r">共有数据：<strong id="sl">
+
+        </strong> 条</span>
+
+      <input type="text" placeholder="请输入查询内容" id="search">
+      <button onclick="search()">搜索</button>
+    </div>
+    <div class="mt-20">
+      <table class="table table-border table-bordered table-bg table-hover table-sort">
+        <thead>
+          <tr class="text-c">
+            <th width="40"><input name="" type="checkbox" value=""></th>
+            <th width="50">序号</th>
+            <th width="200">关注作者名</th>
+            <th width="200">关注账号</th>
+
+            <th>头像</th>
+            <th width="200">用户名</th>
+            <th width="200">用户账号</th>
+
+            <th width="100">操作</th>
+
+          </tr>
+        </thead>
+        <tbody id="tbody">
+
+        </tbody>
+        <span onclick="jump('first')">首页</span>
+        <span onclick="jump('prev')"><b>|前一页</b></span>
+        <span>1/6</span>
+        <span><input type="text" id="gopage"><button onclick="jump('go')">go</button></span>
+        <span onclick="jump('next')"><b>下一页|</b></span>
+        <span onclick="jump('final')">尾页</span>
+      </table>
+    </div>
+  </div>
+
+  <!--_footer 作为公共模版分离出去-->
+  <script type="text/javascript" src="lib/jquery/1.9.1/jquery.min.js"></script>
+  <script type="text/javascript" src="lib/layer/2.4/layer.js"></script>
+  <script type="text/javascript" src="static/h-ui/js/H-ui.min.js"></script>
+  <script type="text/javascript" src="static/h-ui.admin/js/H-ui.admin.js"></script>
+  <!--/_footer 作为公共模版分离出去-->
+
+  <!--请在下方写此页面业务相关的脚本-->
+  <script type="text/javascript" src="lib/My97DatePicker/4.8/WdatePicker.js"></script>
+  <script type="text/javascript" src="lib/datatables/1.10.0/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" src="lib/laypage/1.2/laypage.js"></script>
+  <script type="text/javascript">
+    let allpage = 0 //总页数
+    let nowpage = 1 //当前页
+    let length = ''
+
+    //请求页面数据
+    function getprolist(pagesize, page) {
+      let count = ''
+      $.post('http://localhost:3000/gzht/getinfobypage', {
+        pagesize: pagesize,
+        page: page
+      }, (data) => {
+        console.log(data)
+        if (data.err == 0) {
+          allpage = data.info.allpage
+          renderlist(data.info.list)
+          length = data.info.count
+          $("#sl").html(length);
+        } else if (data.err == -999) {
+          alert("请先登录")
+          window.location.href = './login.html'
+        } else {
+          alert('请刷新页面')
+        }
+      })
+    }
+
+    //渲染表格
+    function renderlist(data) {
+      let str = ''
+      for (let index = 0; index < data.length; index++) {
+        let tmpstr = ` 
+        <tr class="text-c">
+            <td><input name="" type="checkbox" value=""></td>
+            <td>${index+1}</td>
+            <td>${data[index].author}</td>
+            <td>${data[index].zzaccount}</td>
+           
+            <td class="text-l"><img  src='${data[index].tximg}' style="width:100px;height:100px;border-radius:50%"></td>
+            <td class="text-c">${data[index].name}</td>
+            <td>${data[index].account}</td>
+            
+            <td class="td-manage">
+               
+                <a style="text-decoration:none" class="ml-5" onClick="user_del(this,'${data[index]._id}')" href="javascript:;" title="删除"><i
+                  class="Hui-iconfont">&#xe6e2;</i></a></td>
+          </tr>`
+        str += tmpstr
+      }
+      $('#tbody').html(str)
+    }
+
+    getprolist(6, 1)
+
+    //页面分页跳转
+    function jump(type) {
+      switch (type) {
+        case 'first':
+          nowpage = 1
+          break;
+        case 'final':
+          nowpage = allpage
+
+          break;
+        case 'next':
+          if (nowpage == allpage) {
+            alert("后面没有了")
+            break;
+          }
+          nowpage++
+          break;
+        case 'prev':
+          if (nowpage == 1) {
+            alert("这是第一页")
+            break;
+          }
+          nowpage--
+          break;
+        case 'go':
+
+          let num = $('#gopage').val()
+          if (num < 0 || num > allpage) {
+            alert("参数错误")
+            break;
+          } else {
+            nowpage = num
+          }
+          break;
+        default:
+          break;
+      }
+      getprolist(6, nowpage)
+    }
+
+
+
+    /*图片-添加*/
+    function user_add(title, url) {
+      var index = layer.open({
+        type: 2,
+        title: title,
+        content: url
+      });
+      layer.full(index);
+    }
+
+
+
+    /*图片-删除*/
+    function user_del(obj, id) {
+      layer.confirm('确认要删除吗？', function (index) {
+        $.post('http://localhost:3000/gzht/delete', {
+          _id: id
+        }, (data) => {
+          if (data.err == 0) {
+            layer.msg('已删除!', {
+              icon: 1,
+              time: 1000
+            });
+            getprolist(6, nowpage)
+          } else {
+            layer.msg('删除失败!', {
+              icon: 1,
+              time: 1000
+            });
+          }
+        })
+      });
+    }
+
+
+    //模糊查询
+    function search() {
+
+      let str = $('#search').val()
+      $.post('http://localhost:3000/gzht/getinfobykw', {
+        kw: str
+      }, (data) => {
+        if (data.err == 0) {
+          renderlist(data.list)
+          console.log(data.list)
+          $("#sl").html(data.list.length);
+        }
+      })
+    }
+
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,182 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="renderer" content="webkit|ie-comp|ie-stand">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+  <meta name="viewport"
+    content="width=device-width,initial-scale=1,minimum-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+  <meta http-equiv="Cache-Control" content="no-siteapp" />
+
+  <link rel="stylesheet" type="text/css" href="static/h-ui/css/H-ui.min.css" />
+  <link rel="stylesheet" type="text/css" href="static/h-ui.admin/css/H-ui.admin.css" />
+  <link rel="stylesheet" type="text/css" href="lib/Hui-iconfont/1.0.8/iconfont.css" />
+  <link rel="stylesheet" type="text/css" href="static/h-ui.admin/skin/default/skin.css" id="skin" />
+  <link rel="stylesheet" type="text/css" href="static/h-ui.admin/css/style.css" />
+
+  <title>新增图片</title>
+  <link href="lib/webuploader/0.1.5/webuploader.css" rel="stylesheet" type="text/css" />
+</head>
+
+<body>
+  <div class="page-container">
+    <div class="form form-horizontal" id="form-article-add">
+      <div class="row cl">
+        <label class="form-label col-xs-4 col-sm-2">作品名：</label>
+        <div class="formControls col-xs-8 col-sm-9">
+          <input type="text" class="input-text" value="" placeholder="" id="title" name="">
+        </div>
+      </div>
+
+      <div class="row cl">
+        <label class="form-label col-xs-4 col-sm-2">作者：</label>
+        <div class="formControls col-xs-8 col-sm-9">
+          <input type="text" class="input-text" value="" placeholder="" id="author" name="">
+        </div>
+      </div>
+      <div class="row cl">
+        <label class="form-label col-xs-4 col-sm-2">作者账号：</label>
+        <div class="formControls col-xs-8 col-sm-9">
+          <input type="text" class="input-text" value="" placeholder="" id="zzaccount" name="">
+        </div>
+      </div>
+      <div class="row cl">
+        <label class="form-label col-xs-4 col-sm-2">用户：</label>
+        <div class="formControls col-xs-8 col-sm-9">
+          <input type="text" class="input-text" value="" placeholder="" id="name" name="">
+        </div>
+      </div>
+      <div class="row cl">
+        <label class="form-label col-xs-4 col-sm-2">用户账号:</label>
+        <div class="formControls col-xs-8 col-sm-9">
+          <input type="text" class="input-text" value="" placeholder="" id="account" name="">
+        </div>
+      </div>
+      <div class="row cl">
+        <label class="form-label col-xs-4 col-sm-2">评论内容:</label>
+        <div class="formControls col-xs-8 col-sm-9">
+          <input type="text" class="input-text" value="" placeholder="" id="content" name="">
+        </div>
+      </div>
+      <!-- <div class="row cl">
+        <label class="form-label col-xs-4 col-sm-2">头像：</label>
+        <div class="formControls col-xs-8 col-sm-9">
+          <input type="file" class="input-text" value="" placeholder="" id="file" name="">
+          <button onclick="doupload()">上传图片</button>
+          <img src="" alt="" width=200 id="img">
+        </div>
+      </div> -->
+
+      <div class="row cl">
+        <div class="col-xs-8 col-sm-9 col-xs-offset-4 col-sm-offset-2">
+
+          <button onclick="submit();" class="btn btn-secondary radius" type="button"><i
+              class="Hui-iconfont">&#xe632;</i> 提交</button>
+          <button onclick="layer_close();" class="btn btn-default radius"
+            type="button">&nbsp;&nbsp;取消&nbsp;&nbsp;</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!--_footer 作为公共模版分离出去-->
+  <script type="text/javascript" src="lib/jquery/1.9.1/jquery.min.js"></script>
+  <script type="text/javascript" src="lib/layer/2.4/layer.js"></script>
+  <script type="text/javascript" src="static/h-ui/js/H-ui.min.js"></script>
+  <script type="text/javascript" src="static/h-ui.admin/js/H-ui.admin.js"></script>
+  <!--/_footer /作为公共模版分离出去-->
+
+  <!--请在下方写此页面业务相关的脚本-->
+  <script type="text/javascript" src="lib/jquery.validation/1.14.0/jquery.validate.js"></script>
+  <script type="text/javascript" src="lib/jquery.validation/1.14.0/validate-methods.js"></script>
+  <script type="text/javascript" src="lib/jquery.validation/1.14.0/messages_zh.js"></script>
+  <script type="text/javascript" src="lib/webuploader/0.1.5/webuploader.min.js"></script>
+  <script type="text/javascript">
+    let id = localStorage.getItem('procom_id')
+
+
+    let imgurl = null
+
+    function article_save() {
+      alert("刷新父级的时候会自动关闭弹层。")
+      window.parent.location.reload();
+    }
+    //请求页面数据
+    function getinfo() {
+      var title = document.getElementById("title");
+      var author = document.getElementById("author");
+      var zzaccount = document.getElementById("zzaccount");
+      var name = document.getElementById("name");
+      var account = document.getElementById("account");
+      var content = document.getElementById("content");
+
+      $.post('http://localhost:3000/com/getinfoht', {
+        _id: id
+      }, (data) => {
+        console.log(data)
+        if (data.err == 0) {
+          console.log(data.list)
+          title.value = data.list[0].title
+          author.value = data.list[0].author
+          zzaccount.value = data.list[0].zzaccount
+          name.value = data.list[0].myname
+          account.value = data.list[0].myaccount
+          content.value = data.list[0].content
+        } else {
+          alert('请刷新页面')
+        }
+      })
+    }
+    getinfo()
+    //提交数据
+    function submit() {
+      let params = {
+        _id: id,
+        title: $('#title').val(),
+        author: $('#author').val(),
+        zzaccount: $('#zzaccount').val(),
+        myname: $('#name').val(),
+        myaccount: $('#account').val(),
+        content: $('#content').val(),
+      }
+
+      $.post('http://localhost:3000/com/updateht', params, (data) => {
+        console.log(data)
+        if (data.err == 0) {
+          window.parent.location.reload();
+        }
+      })
+
+
+    }
+    //上传图片
+    function doupload() {
+      let file = $('#file').get(0).files[0] //获取图片
+      let formdata = new FormData()
+      formdata.append('lai', file)
+      console.log(file)
+      $.ajax({
+        url: 'http://localhost:3000/file/upload',
+        type: 'POST',
+        cache: false,
+        data: formdata,
+        processData: false,
+        contentType: false,
+        success: function (data) {
+          console.log(data)
+          if (data.err == 0) {
+            imgurl = "http://127.0.0.1:3000" + data.img
+            $('#img').attr('str', `http://localhost:3000${data.img}`)
+          } else {
+            alert("上传失败")
+          }
+        }
+      })
+    }
+
+  </script>
+</body>
+
+</html>
